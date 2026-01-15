@@ -25,13 +25,14 @@ all: setup $(TARGET)
 setup:
 	@mkdir -p $(BIN_DIR)
 	@mkdir -p $(OBJ_DIR)
+	@bash scripts/install.sh
 
 # Linking: Combine all .o files into the final executable
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 # Compilation: Convert each .cpp file into a .o file
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | setup
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 

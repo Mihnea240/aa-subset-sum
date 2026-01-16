@@ -8,5 +8,5 @@
 using namespace std;
 
 int main() {
-    cout << "Dynamic Programming Solver Initialized." << endl;
+    
 }

@@ -18,14 +18,18 @@ TARGET := $(BIN_DIR)/subset_sum
 
 # --- Rules ---
 
-# Default rule: Build the final binary
-all: setup $(TARGET)
 
-# Create necessary directories
-setup:
+# Install/setup: create directories and install requirements (run once)
+install:
 	@mkdir -p $(BIN_DIR)
 	@mkdir -p $(OBJ_DIR)
 	@bash scripts/install.sh
+
+# Default rule: Build the final binary (no setup/install)
+all: $(TARGET)
+
+# Alias for build
+build: all
 
 # Linking: Combine all .o files into the final executable
 $(TARGET): $(OBJS)
@@ -40,4 +44,4 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 clean:
 	rm -rf $(BIN_DIR) $(OBJ_DIR)
 
-.PHONY: all setup clean bench
+.PHONY: all build install clean bench

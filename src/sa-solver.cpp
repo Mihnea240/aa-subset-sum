@@ -8,7 +8,6 @@
 #include <chrono>
 #include "include/sa-solver.h"
 
-// 2. The Concrete Implementation
 class SubsetSumSolver : public SASubsetSumSolver {
 private:
     double initial_temp;
@@ -33,11 +32,9 @@ public:
         rng.seed(std::random_device{}());
     }
 
-    // --- Implementation of the requested virtual method ---
     long long solve(const std::vector<long long> &numbers, long long target) override {
         int n = numbers.size();
         
-        // State: 1 = included, 0 = excluded
         std::vector<int8_t> current_state(n);
         long long current_sum = 0;
 
@@ -79,7 +76,6 @@ public:
             if (new_error < current_error) {
                 accept = true;
             } else {
-                // Metropolis criterion
                 double p = std::exp((current_error - new_error) / temperature);
                 if (getRandomDouble() < p) {
                     accept = true;
@@ -101,7 +97,6 @@ public:
                 temperature *= cooling_rate;
             }
         }
-
         return best_sum;
     }
 };

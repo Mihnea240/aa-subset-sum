@@ -1,22 +1,87 @@
 #include <iostream>
 #include <vector>
+#include <string>
+#include <fstream>
 
 #include "dp-solver.h"
 #include "mitm-solver.h"
-#include "sa-solver.h"
+// #include "sa-solver.h"
 
 using namespace std;
 
-int main() {
-    DPSolver dpSolver;
+void printUsage() {
+    cout << "Usage: ./subset_sum <input_file> <method> <bebug?>\n";
+    cout << "Methods: dp, mitm, sa\n";
+    cout << "Set debug to any value to enable debug output.\n";
+}
 
-    vector<long long> nums = {3, 34, 4, 12, 5, 2};
-    long long target = 9;
-    long long result = dpSolver.solve(nums, target);
+int main(int argc, char *argv[]) {
 
-    for (long long num : dpSolver.getSolutionSubset()) {
-        cout << num << " ";
+    
+    if (argc < 3) {
+        printUsage();
+        return 1;
     }
-    cout << "\nClosest sum to target " << target << " is: " << result<< "\n";
+
+    string filename = argv[1];
+    string method = argv[2];
+    int debug = argc >= 4;
+
+    // Read input from file
+    vector<long long> numbers;
+    int count = 0;
+    long long target;
+
+    ifstream infile(filename);
+
+    if(!infile.is_open()) {
+        cerr << "Error opening file: " << filename << endl;
+        return 1;
+    }
+
+    infile >> count;
+    infile >> target;
+
+    for (int i = 0; i < count; ++i) {
+        long long num;
+        infile >> num;
+        numbers.push_back(num);
+    }
+
+
+    SubsetSumSolver* solver = nullptr;
+
+    if (method == "dp") {
+        solver = new DPSolver();
+    } else if (method == "mitm") {
+        solver = new MITMSolver();
+    } else if (method == "sa") {
+        // solver = new SASubsetSumSolver();
+    } else {
+        cerr << "Unknown method: " << method << endl;
+        printUsage();
+        return 1;
+    }
+
+    long long result = solver->solve(numbers, target);
+    auto subset = solver->getSolutionSubset();
+
+    if(!debug) {
+        return 0;
+    }
+
+    if (result != target) {
+        cout << "Closest sum found: " << result << " (target was " << target << ")\n";
+    } else {
+        cout << "Exact sum found: " << result << "\n";
+    }
+
+    cout << "Subset used:\n";
+    for (const auto& val : subset) {
+        cout << val << " ";
+    }
+
+    cout << endl;
+
     return 0;
 }

@@ -77,11 +77,18 @@ int main(int argc, char *argv[]) {
     }
 
     cout << "Subset used:\n";
-    for (const auto& val : subset) {
+    long long sum = 0;
+    for (const auto &val : subset) {
         cout << val << " ";
+        sum+= val;
     }
 
-    cout << endl;
+    cout << "Subset sum: " << sum << endl;
+
+    if (sum != result) {
+        cout << "Warning: Calculated subset sum " << sum << " does not match reported result " << result << endl;
+        return 2;
+    }
 
     return 0;
 }

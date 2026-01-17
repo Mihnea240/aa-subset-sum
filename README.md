@@ -1,3 +1,39 @@
+## Command-Line Usage
+
+### Run the Subset Sum Solver
+The main executable is `bin/subset_sum`. You can run it directly on any test file:
+
+```sh
+./bin/subset_sum <input_file> <method> [debug]
+```
+
+- `<input_file>`: Path to a test file (see `tests/` for examples)
+- `<method>`: Algorithm to use (`dp`, `mitm`, or `sa`)
+- `[debug]`: Any value enables verbose/debug output (optional)
+
+#### Example:
+```sh
+./bin/subset_sum tests/high_n_100.in dp debug
+```
+
+#### Output:
+- If debug is enabled, prints the closest or exact sum found, the subset used, and the sum of the subset.
+- If the subset sum does not match the reported result, a warning is printed.
+
+### Test Files
+Test files are generated in the `tests/` directory using `make tests`. Each file contains:
+- The number of elements
+- The target sum
+- The list of numbers
+
+### Methods
+- `dp`: Dynamic Programming
+- `mitm`: Meet-in-the-Middle
+- `sa`: Simulated Annealing (if implemented)
+
+### Debug Output
+Add any third argument to enable debug output and see the subset and sum details.
+
 ## Makefile Usage
 
 ### Build the Project

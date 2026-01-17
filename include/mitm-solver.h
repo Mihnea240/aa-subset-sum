@@ -2,7 +2,7 @@
 
 #include "solver.h"
 #include <vector>
-#include <utility> // for std::pair
+#include <utility>
 
 class MITMSolver : public SubsetSumSolver {
 public:

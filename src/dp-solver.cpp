@@ -9,8 +9,8 @@ std::string DPSolver::getAlgorithmName() const {
 }
 
 long long DPSolver::solve(const std::vector<long long> &numbers, long long target) {
-    // 1. Clear previous results (using the member variable from the base/header)
-    solutionSubset.clear(); // Ensure this matches the name in your solver.h (solution_subset vs solutionSubset)
+    // 1. Clear previous results
+    solutionSubset.clear();
 
     long long n = numbers.size();
 
@@ -25,12 +25,11 @@ long long DPSolver::solve(const std::vector<long long> &numbers, long long targe
     }
 
     // "Offset" is what we add to a real sum to get its array index.
-    // Example: If min sum is -50, offset is +50. Real sum -50 becomes index 0.
     long long offset = -min_possible_sum;
     long long range = max_possible_sum - min_possible_sum + 1;
 
-    // Safety check: If the range is massive (e.g., billions), DP will crash memory.
-    if (range > 200000000) { // arbitrary safety limit (~200MB)
+    // Safety limit (~200 MB)
+    if (range > 200000000) {
         std::cerr << "Warning: Sum range is too large for DP table." << std::endl;
         return 0;
     }
@@ -39,8 +38,6 @@ long long DPSolver::solve(const std::vector<long long> &numbers, long long targe
     // dp[i][j] means: Using first 'i' items, is sum (j - offset) possible?
     std::vector<std::vector<bool>> dp(n + 1, std::vector<bool>(range, false));
 
-    // Base Case: Sum 0 is always possible
-    // The index for sum 0 is (0 + offset)
     dp[0][offset] = true;
 
     // 4. Fill the table
@@ -48,15 +45,12 @@ long long DPSolver::solve(const std::vector<long long> &numbers, long long targe
         long long current_val = numbers[i - 1];
 
         for (long long j = 0; j < range; ++j) {
-            // Option A: Exclude the current number
             bool possible = dp[i - 1][j];
 
-            // Option B: Include the current number
-            // We need to check the previous state.
-            // Current index 'j' represents real sum S.
-            // We need previous real sum (S - current_val).
-            // Previous index = (j - offset - current_val) + offset
-            //                = j - current_val
+            /**
+             * Previous index = (j - offset - current_val) + offset
+             *                = j - current_val
+             */
             long long prev_index = j - current_val;
 
             if (prev_index >= 0 && prev_index < range) {
@@ -69,17 +63,14 @@ long long DPSolver::solve(const std::vector<long long> &numbers, long long targe
 
     // 5. Find the closest sum <= target
     // We want the largest index 'j' such that dp[n][j] is true AND (j - offset) <= target.
-    // (j - offset) <= target  =>  j <= target + offset
-
-    long long best_sum = LLONG_MIN; // Initialize to LLONG_MIN
+    long long best_sum = LLONG_MIN;
     long long start_search_index = target + offset;
 
-    // Clamp search index to the table bounds
     if (start_search_index >= range) start_search_index = range - 1;
 
     // If target is smaller than the smallest possible sum, we can't start search
     if (start_search_index < 0) {
-        return best_sum; // Return failure (or handle as "no solution")
+        return best_sum;
     }
 
     int found_index = -1;
@@ -91,24 +82,19 @@ long long DPSolver::solve(const std::vector<long long> &numbers, long long targe
         }
     }
 
-    if (found_index == -1) return best_sum; // No valid sum found
+    if (found_index == -1) return best_sum;
 
     // 6. Backtrack to find the subset
     long long current_index = found_index;
 
     for (long long i = n; i > 0; --i) {
-        // Look at the cell directly above (dp[i-1][current_index]).
-        // If it's true, it means we could form this sum WITHOUT the current item.
         if (dp[i - 1][current_index]) {
-            continue; // Skip item
+            continue;
         }
 
-        // If false, we MUST have used the current item.
         long long val = numbers[i - 1];
         solutionSubset.push_back(val);
 
-        // Move our index back by the value of the item
-        // prev_index = current_index - val
         current_index = current_index - val;
     }
 

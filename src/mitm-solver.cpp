@@ -6,7 +6,6 @@ std::string MITMSolver::getAlgorithmName() const {
     return "Meet-in-the-Middle";
 }
 
-// Helper to generate all combinations of sums
 void MITMSolver::generateSubsets(const std::vector<long long>& nums,
                                  std::vector<std::pair<long long, unsigned long long>>& results) {
     int n = nums.size();
@@ -27,7 +26,7 @@ void MITMSolver::generateSubsets(const std::vector<long long>& nums,
 }
 
 long long MITMSolver::solve(const std::vector<long long>& numbers, long long target) {
-    // 1. Clear previous results from the base class storage
+    // 1. Clear previous results
     solutionSubset.clear();
 
     int n = numbers.size();
@@ -39,14 +38,13 @@ long long MITMSolver::solve(const std::vector<long long>& numbers, long long tar
     std::vector<long long> right_part(numbers.begin() + mid, numbers.end());
 
     // 3. Generate all subset sums for both halves
-    // Structure: {sum, bitmask}
     std::vector<std::pair<long long, unsigned long long>> left_sums;
     std::vector<std::pair<long long, unsigned long long>> right_sums;
 
     generateSubsets(left_part, left_sums);
     generateSubsets(right_part, right_sums);
 
-    // 4. Sort the left side to enable Binary Search
+    // 4. Sort the left side for binary search
     std::sort(left_sums.begin(), left_sums.end());
 
     // 5. Iterate through Right sums and match with Left
@@ -54,9 +52,6 @@ long long MITMSolver::solve(const std::vector<long long>& numbers, long long tar
     unsigned long long best_left_mask = 0;
     unsigned long long best_right_mask = 0;
 
-    // Remove duplicates from left_sums to speed up binary search (Optional optimization)
-    // auto ip = std::unique(left_sums.begin(), left_sums.end(), [](auto a, auto b){ return a.first == b.first; });
-    // left_sums.resize(std::distance(left_sums.begin(), ip));
 
     for (const auto& r_pair : right_sums) {
         long long r_sum = r_pair.first;
@@ -71,10 +66,8 @@ long long MITMSolver::solve(const std::vector<long long>& numbers, long long tar
         // Binary search (upper_bound) to find the first element > remainder
         auto it = std::upper_bound(left_sums.begin(), left_sums.end(),
                                    std::make_pair(remainder, (unsigned long long)-1));
-
-        // Move iterator back one step to find the largest element <= remainder
         if (it != left_sums.begin()) {
-            it--; // Now 'it' points to the best match in the left half
+            it--;
 
             long long current_total = r_sum + it->first;
 

@@ -74,16 +74,16 @@ bench_dp_magnitude:
 		-o $(REPORT_DIR)/dp_magnitude_impact.png \
 		$(BENCH_DIR)/dp_mag.json
 
-bench_mitm_magnitude:
-	hyperfine -L N 100,200,300,400,500,600,700,800,900,1000 \
-		--export-json $(BENCH_DIR)/mitm_mag.json \
-		"./bin/subset_sum tests/high_n_{mag}.in mitm"
+bench_high_n_comparison:
+    # Comparație DP vs SA pe scara 100-1000
+	hyperfine -L n 100,200,400,600,800,1000 \
+        --export-json $(BENCH_DIR)/high_n.json \
+        "./bin/subset_sum tests/high_n_{n}.in dp" \
+        "./bin/subset_sum tests/high_n_{n}.in sa"
 	python3 scripts/plot_parametrized.py \
-		--log-time \
-		--log-x \
-		--title "Mitm" \
-		-o $(REPORT_DIR)/mitm_magnitude_impact.png \
-		$(BENCH_DIR)/mitm_mag.json
+        --log-time --titles "DP, SA" \
+        -o $(REPORT_DIR)/high_n_efficiency.png \
+        $(BENCH_DIR)/high_n.json
 
 bench_sa_stability:
 	# Runs the same test 50 times to see the variance in SA performance

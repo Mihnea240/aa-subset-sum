@@ -34,7 +34,7 @@
 
 //     long long solve(const std::vector<long long> &numbers, long long target) override {
 //         int n = numbers.size();
-        
+
 //         std::vector<int8_t> current_state(n);
 //         long long current_sum = 0;
 
@@ -50,7 +50,7 @@
 
 //         long long best_error = std::abs(current_sum - target);
 //         long long best_sum = current_sum;
-        
+
 //         double temperature = initial_temp;
 
 //         for (int iter = 0; iter < max_iterations; ++iter) {

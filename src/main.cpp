@@ -17,7 +17,7 @@ void printUsage() {
 
 int main(int argc, char *argv[]) {
 
-    
+
     if (argc < 3) {
         printUsage();
         return 1;
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
         sum+= val;
     }
 
-    cout << "Subset sum: " << sum << endl;
+    cout << "\nSubset sum: " << sum << endl;
 
     if (sum != result) {
         cout << "Warning: Calculated subset sum " << sum << " does not match reported result " << result << endl;

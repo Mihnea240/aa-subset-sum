@@ -29,7 +29,7 @@ Test files are generated in the `tests/` directory using `make tests`. Each file
 ### Methods
 - `dp`: Dynamic Programming
 - `mitm`: Meet-in-the-Middle
-- `sa`: Simulated Annealing (if implemented)
+- `sa`: Simulated Annealing
 
 ### Debug Output
 Add any third argument to enable debug output and see the subset and sum details.

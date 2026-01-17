@@ -1,102 +1,117 @@
-// #include <iostream>
-// #include <vector>
-// #include <cmath>
-// #include <numeric>
-// #include <random>
-// #include <algorithm>
-// #include <ctime>
-// #include <chrono>
-// #include "include/sa-solver.h"
+#include "sa-solver.h"
 
-// class SubsetSumSolver : public SASubsetSumSolver {
-// private:
-//     double initial_temp;
-//     double cooling_rate;
-//     double min_temp;
-//     int max_iterations;
-//     std::mt19937 rng;
+std::string SASolver::getAlgorithmName() const {
+	return "Simulated Annealing";
+}
 
-//     inline int getRandomInt(int min, int max) {
-//         std::uniform_int_distribution<int> dist(min, max);
-//         return dist(rng);
-//     }
+long long SASolver::solve(const std::vector<long long> &numbers, long long target) {
+	this->solutionSubset.clear();
 
-//     inline double getRandomDouble() {
-//         std::uniform_real_distribution<double> dist(0.0, 1.0);
-//         return dist(rng);
-//     }
+	// --- Tuning Parameters ---
+	constexpr int MAX_ITERATIONS = 25000000;
+	constexpr double INITIAL_TEMP = 500000.0;
+	constexpr double MIN_TEMP = 0.00001;
+	constexpr double COOLING_RATE = 0.9999998;
 
-// public:
-//     SubsetSumSolver(int max_iter = 25000000, double start_temp = 500000.0, double cool_rate = 0.9999998)
-//         : max_iterations(max_iter), initial_temp(start_temp), cooling_rate(cool_rate), min_temp(0.00001) {
-//         rng.seed(std::random_device{}());
-//     }
+	// --- Random Number Generator ---
+	std::mt19937 rng(std::random_device{}());
+	std::uniform_real_distribution<double> dist_double(0.0, 1.0);
+		
+	int n = numbers.size();
+	std::uniform_int_distribution<int> dist_index(0, n - 1);
 
-//     long long solve(const std::vector<long long> &numbers, long long target) override {
-//         int n = numbers.size();
+	// --- 1. Initialization ---
+	// State: 1 = included, 0 = excluded
+	std::vector<int8_t> current_state(n);
+	long long current_sum = 0;
 
-//         std::vector<int8_t> current_state(n);
-//         long long current_sum = 0;
+	// Randomly fill initial state
+	std::uniform_int_distribution<int> dist_bool(0, 1);
+	for (int i = 0; i < n; ++i) {
+		if (dist_bool(rng)) {
+			current_state[i] = 1;
+			current_sum += numbers[i];
+		} else {
+			current_state[i] = 0;
+		}
+	}
 
-//         // Random Initialization
-//         for (int i = 0; i < n; ++i) {
-//             if (getRandomInt(0, 1)) {
-//                 current_state[i] = 1;
-//                 current_sum += numbers[i];
-//             } else {
-//                 current_state[i] = 0;
-//             }
-//         }
+	// Track Best Solution found so far
+	long long best_error = std::abs(current_sum - target);
+	long long best_sum = current_sum;
+	
+	std::vector<int8_t> best_state = current_state; 
+		
+	double temperature = INITIAL_TEMP;
 
-//         long long best_error = std::abs(current_sum - target);
-//         long long best_sum = current_sum;
+	// --- 2. Annealing Loop ---
+	for (int iter = 0; iter < MAX_ITERATIONS; ++iter) {
+			
+		// Early exit if exact match found
+		if (best_error == 0) {
+			// Populate the solution vector before returning
+			for (int i = 0; i < n; ++i) {
+				if (best_state[i] == 1) {
+					this->solutionSubset.push_back(numbers[i]);
+				}
+			}
+			return target;
+		}
 
-//         double temperature = initial_temp;
+		// Pick a random index to flip
+		int idx = dist_index(rng);
+			
+		long long new_sum = current_sum;
+			
+		// Calculate new sum (O(1) update)
+		if (current_state[idx] == 1) {
+			new_sum -= numbers[idx];
+		} else {
+			new_sum += numbers[idx];
+		}
 
-//         for (int iter = 0; iter < max_iterations; ++iter) {
-//             // Early exit if exact match found
-//             if (best_error == 0) return target;
+		long long new_error = std::abs(new_sum - target);
+		long long current_error = std::abs(current_sum - target);
 
-//             // Neighbor selection
-//             int idx = getRandomInt(0, n - 1);
-//             long long new_sum = current_sum;
+		// --- Acceptance Logic ---
+		bool accept = false;
+			
+		if (new_error < current_error) {
+			accept = true; // Always accept improvements
+		} else {
+			// Metropolis criterion
+			double p = std::exp((current_error - new_error) / temperature);
+			if (dist_double(rng) < p) {
+				accept = true;
+			}
+		}
 
-//             // Flip logic
-//             if (current_state[idx] == 1) {
-//                 new_sum -= numbers[idx];
-//             } else {
-//                 new_sum += numbers[idx];
-//             }
+		if (accept) {
+			// Update Current State
+			current_state[idx] = 1 - current_state[idx];
+			current_sum = new_sum;
 
-//             long long new_error = std::abs(new_sum - target);
-//             long long current_error = std::abs(current_sum - target);
+			// Update Global Best if this is the best we've seen
+			if (new_error < best_error) {
+				best_error = new_error;
+				best_sum = current_sum;
+				best_state = current_state;
+			}
+		}
 
-//             // Acceptance Logic
-//             bool accept = false;
-//             if (new_error < current_error) {
-//                 accept = true;
-//             } else {
-//                 double p = std::exp((current_error - new_error) / temperature);
-//                 if (getRandomDouble() < p) {
-//                     accept = true;
-//                 }
-//             }
+		// --- Cooling ---
+		if (temperature > MIN_TEMP) {
+			temperature *= COOLING_RATE;
+		}
+	}
 
-//             if (accept) {
-//                 current_state[idx] = 1 - current_state[idx];
-//                 current_sum = new_sum;
+	// --- 3. Final Result Generation ---
+	// If the loop finishes without an exact match, reconstruct the closest solution found
+	for (int i = 0; i < n; ++i) {
+		if (best_state[i] == 1) {
+			this->solutionSubset.push_back(numbers[i]);
+		}
+	}
 
-//                 if (new_error < best_error) {
-//                     best_error = new_error;
-//                     best_sum = current_sum;
-//                 }
-//             }
-
-//             // Cooling
-//             if (temperature > min_temp) {
-//                 temperature *= cooling_rate;
-//             }
-//         }
-//         return best_sum;
-//     }
-// };
+	return best_sum;
+}

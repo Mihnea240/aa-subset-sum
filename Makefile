@@ -1,3 +1,4 @@
+
 # --- Compiler Settings ---
 CXX      := g++
 CXXFLAGS := -O3 -Wall -std=c++17 -Iinclude
@@ -75,27 +76,45 @@ bench_dp_magnitude:
 		$(BENCH_DIR)/dp_mag.json
 
 bench_high_n_comparison:
-    # Comparație DP vs SA pe scara 100-1000
+	# Comparație DP vs SA pe scara 100-1000
 	hyperfine -L n 100,200,400,600,800,1000 \
-        --export-json $(BENCH_DIR)/high_n.json \
-        "./bin/subset_sum tests/high_n_{n}.in dp" \
-        "./bin/subset_sum tests/high_n_{n}.in sa"
+	--export-json $(BENCH_DIR)/high_n_dp.json \
+	"./bin/subset_sum tests/high_n_{n}.in dp"
+	hyperfine -L n 100,200,400,600,800,1000 \
+	--export-json $(BENCH_DIR)/high_n_sa.json \
+	"./bin/subset_sum tests/high_n_{n}.in sa"
 	python3 scripts/plot_parametrized.py \
-        --log-time --titles "DP, SA" \
-        -o $(REPORT_DIR)/high_n_efficiency.png \
-        $(BENCH_DIR)/high_n.json
+	--log-time --titles "DP, SA" \
+	-o $(REPORT_DIR)/high_n_efficiency.png \
+	$(BENCH_DIR)/high_n_dp.json $(BENCH_DIR)/high_n_sa.json
 
 bench_sa_stability:
 	# Runs the same test 50 times to see the variance in SA performance
 	hyperfine --runs 50 --export-json $(BENCH_DIR)/sa_stability.json \
 		"./bin/subset_sum tests/high_n_500.in sa" \
-		"./bin/subset_sum tests/high_n_500.in dp"
+# 		"./bin/subset_sum tests/high_n_500.in dp"
 	# plot_whisker is the best for showing "Stability" (variance)
 	python3 scripts/plot_whisker.py \
 		-o $(REPORT_DIR)/sa_stability_whisker.png \
 		$(BENCH_DIR)/sa_stability.json
 
+
+bench_hard_sa:
+	hyperfine -L n 350,650,950 \
+	--export-json $(BENCH_DIR)/hard_sa_sol.json \
+	"./bin/subset_sum tests/hard_sa_{n}_sol.in sa"
+	hyperfine -L n 500,800 \
+	--export-json $(BENCH_DIR)/hard_sa_nosol.json \
+	"./bin/subset_sum tests/hard_sa_{n}_nosol.in sa"
+	python3 scripts/plot_parametrized.py \
+	--log-time --titles "SA (sol)","SA (nosol)" \
+	-o $(REPORT_DIR)/hard_sa_bench.png \
+	$(BENCH_DIR)/hard_sa_sol.json $(BENCH_DIR)/hard_sa_nosol.json
+
 # Cleanup
+sa_probability:
+	python3 scripts/sa_probability.py | tee $(REPORT_DIR)/sa_probability.txt
+
 clean:
 	rm -rf $(BIN_DIR) $(OBJ_DIR)
 

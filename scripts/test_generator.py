@@ -24,11 +24,15 @@ class TestConfig:
     def generate(self):
         if self.target is None:
             S = [random.randint(self.min_val, self.max_val) for _ in range(self.n)]
-            self.target = sum(random.sample(S, self.soultion_count))
+            t = sum(random.sample(S, self.soultion_count))
+            self.target = abs(t) if t <= 0 else t
         else:
+            # Always enforce positive target
+            t = self.target if self.target > 0 else abs(self.target) + 1
             S = [random.randint(self.min_val, self.max_val) for _ in range(self.n - 1)]
             my_sum = sum(random.sample(S, self.soultion_count - 1))
-            S.append(self.target - my_sum)
+            S.append(t - my_sum)
+            self.target = t
         self.values = S
 
 
@@ -79,6 +83,25 @@ for i in range(1, 11):
     test_suites.append(
         TestConfig(f"high_n_{n_val}", n=n_val, min_val=-1000, max_val=1000, soultion_count=n_val//4, target=t_val)
     )
+    
+# --- CATEGORIA 4: Hard SA Tests (n < 1000, mix of with/without solution) ---
+for i in range(1, 6):
+    n_val = 200 + i * 150  # N: 350, 500, 650, 800, 950
+    if n_val >= 1000:
+        continue
+    min_val = -10**6
+    max_val = 10**6
+    if i % 2 == 1:
+        # With guaranteed solution
+        test_suites.append(
+            TestConfig(f"hard_sa_{n_val}_sol", n=n_val, min_val=min_val, max_val=max_val, soultion_count=n_val//3, target=None)
+        )
+    else:
+        # Random positive target, possibly unreachable
+        target = random.randint(1, n_val * max_val)
+        test_suites.append(
+            TestConfig(f"hard_sa_{n_val}_nosol", n=n_val, min_val=min_val, max_val=max_val, soultion_count=n_val//3, target=target)
+        )
 
 # Rulare generare
 for test in test_suites:

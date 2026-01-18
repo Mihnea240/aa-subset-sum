@@ -8,10 +8,10 @@ long long SASolver::solve(const std::vector<long long> &numbers, long long targe
 	this->solutionSubset.clear();
 
 	// --- Tuning Parameters ---
-	constexpr int MAX_ITERATIONS = 25000000;
-	constexpr double INITIAL_TEMP = 500000.0;
-	constexpr double MIN_TEMP = 0.00001;
-	constexpr double COOLING_RATE = 0.9999998;
+	constexpr int MAX_ITERATIONS = 250000;
+	constexpr double INITIAL_TEMP = 50000.0;
+	constexpr double MIN_TEMP = 0.0001;
+	constexpr double COOLING_RATE = 0.998;
 
 	// --- Random Number Generator ---
 	std::mt19937 rng(std::random_device{}());

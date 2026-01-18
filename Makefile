@@ -1,3 +1,5 @@
+# Run all benchmarks
+bench_all: bench_scaling bench_dp_magnitude bench_high_n_comparison bench_sa_stability bench_hard_sa
 
 # --- Compiler Settings ---
 CXX      := g++
@@ -42,6 +44,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 tests:
 	@mkdir -p tests
+	rm -rf tests/*
 	python3 scripts/test_generator.py
 
 # 1. SCALING PLOT: How N impacts time (Logarithmic scale)
@@ -88,28 +91,16 @@ bench_high_n_comparison:
 	-o $(REPORT_DIR)/high_n_efficiency.png \
 	$(BENCH_DIR)/high_n_dp.json $(BENCH_DIR)/high_n_sa.json
 
-bench_sa_stability:
-	# Runs the same test 50 times to see the variance in SA performance
-	hyperfine --runs 50 --export-json $(BENCH_DIR)/sa_stability.json \
-		"./bin/subset_sum tests/high_n_500.in sa" \
-# 		"./bin/subset_sum tests/high_n_500.in dp"
-	# plot_whisker is the best for showing "Stability" (variance)
-	python3 scripts/plot_whisker.py \
-		-o $(REPORT_DIR)/sa_stability_whisker.png \
-		$(BENCH_DIR)/sa_stability.json
-
 
 bench_hard_sa:
-	hyperfine -L n 350,650,950 \
-	--export-json $(BENCH_DIR)/hard_sa_sol.json \
-	"./bin/subset_sum tests/hard_sa_{n}_sol.in sa"
-	hyperfine -L n 500,800 \
-	--export-json $(BENCH_DIR)/hard_sa_nosol.json \
-	"./bin/subset_sum tests/hard_sa_{n}_nosol.in sa"
+	hyperfine -L n 350,500,650,800,950 \
+		--export-json $(BENCH_DIR)/hard_sa.json \
+		"./bin/subset_sum tests/hard_sa_{n}_sol.in sa" \
+		"./bin/subset_sum tests/hard_sa_{n}_nosol.in sa"
 	python3 scripts/plot_parametrized.py \
-	--log-time --titles "SA (sol)","SA (nosol)" \
-	-o $(REPORT_DIR)/hard_sa_bench.png \
-	$(BENCH_DIR)/hard_sa_sol.json $(BENCH_DIR)/hard_sa_nosol.json
+		--log-time --title "SA Hard Benchmarks" \
+		-o $(REPORT_DIR)/hard_sa_bench.png \
+		$(BENCH_DIR)/hard_sa.json
 
 # Cleanup
 sa_probability:

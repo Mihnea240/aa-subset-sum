@@ -69,33 +69,21 @@ make clean
 
 ## Benchmarking and Plotting
 
-### 1. Scaling Plot (`bench_scaling`)
-Benchmarks both the DP and MITM algorithms on increasing input sizes and plots their performance:
-```sh
-make bench_scaling
-```
-- Output: `plots/scaling_dp_vs_mitm.png`
 
-### 2. DP Magnitude Impact (`bench_dp_magnitude`)
-Benchmarks the DP algorithm with increasing number magnitudes:
-```sh
-make bench_dp_magnitude
-```
-- Output: `plots/dp_magnitude_impact.png`
+### Test Classes
+- **mitm_bench_***: Small N, stress for MITM (Meet-in-the-Middle). Shows where MITM is efficient.
+- **dp_magnitude_***: Fixed N, increasing target magnitude. Shows DP's pseudo-polynomial behavior.
+- **high_n_***: High N, moderate values. Compares DP and SA as N increases, shows where DP fails and SA survives.
+- **hard_sa_*_sol**: Hard for SA, but with a guaranteed solution (target is sum of a random subset). Tests if SA can find the true solution in a large, tricky space.
+- **hard_sa_*_nosol**: Hard for SA, target is set just above the max possible subset sum (sum of all positives), so no subset can reach it. Tests how close SA can get when the target is impossible.
 
-### 3. MITM Magnitude Impact (`bench_mitm_magnitude`)
-Benchmarks the MITM algorithm with increasing input sizes:
-```sh
-make bench_mitm_magnitude
-```
-- Output: `plots/mitm_magnitude_impact.png`
-
-### 4. Simulated Annealing Stability (`bench_sa_stability`)
-Runs the Simulated Annealing and DP algorithms multiple times to compare their stability:
-```sh
-make bench_sa_stability
-```
-- Output: `plots/sa_stability_whisker.png`
+### Benchmark Rules
+- **bench_scaling**: Compares MITM and DP as N increases (scaling behavior).
+- **bench_dp_magnitude**: Shows how DP's time grows with target magnitude.
+- **bench_high_n_comparison**: Compares DP and SA for high N (where DP starts to fail).
+- **bench_sa_stability**: Runs SA multiple times on the same input to show its variance (stability).
+- **bench_hard_sa**: Runs SA on the hardest tests (both with and without solution) to see how it performs in the most challenging cases.
+- **bench_all**: Runs all benchmarks in sequence.
 
 ---
 

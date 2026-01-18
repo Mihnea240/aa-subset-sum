@@ -56,7 +56,7 @@ class TestConfig:
             json.dump(data, jf, indent=2)
 
 
-test_suites = []
+test_suites :list[TestConfig] = []
 
 # --- CATEGORIA 1: Baseline & MITM Stress (10 teste) ---
 # Focus: N crește de la 20 la 42. MITM ar trebui să domine, apoi să "gâfâie".
@@ -91,19 +91,22 @@ for i in range(1, 6):
         continue
     min_val = -10**6
     max_val = 10**6
-    if i % 2 == 1:
-        # With guaranteed solution
-        test_suites.append(
-            TestConfig(f"hard_sa_{n_val}_sol", n=n_val, min_val=min_val, max_val=max_val, soultion_count=n_val//3, target=None)
-        )
-    else:
-        # Random positive target, possibly unreachable
-        target = random.randint(1, n_val * max_val)
-        test_suites.append(
-            TestConfig(f"hard_sa_{n_val}_nosol", n=n_val, min_val=min_val, max_val=max_val, soultion_count=n_val//3, target=target)
-        )
+    
+    # Hard test with guaranteed solution
+    test_suites.append(
+        TestConfig(f"hard_sa_{n_val}_sol", n=n_val, min_val=min_val, max_val=max_val, soultion_count=n_val//3, target=None)
+    )
+    # Hard test with unreachable target: set target just above max possible subset sum
+    values = [random.randint(min_val, max_val) for _ in range(n_val)]
+    max_subset_sum = sum(x for x in values if x > 0)
+    target = max_subset_sum + random.randint(1, 1000)
+    test_suites.append(
+        TestConfig(f"hard_sa_{n_val}_nosol", n=n_val, min_val=min_val, max_val=max_val, soultion_count=n_val//3, target=target, values=values)
+    )
 
 # Rulare generare
 for test in test_suites:
     test.generate()
     test.save()
+    
+    
